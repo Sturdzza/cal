@@ -1,0 +1,29 @@
+---
+import '../styles/global.css';
+import { CalendarApp } from '../components/Calendar/CalendarApp';
+import { STORAGE_KEY } from '../lib/storage';
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no" />
+    <meta name="generator" content={Astro.generator} />
+    <link rel="icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><rect width='24' height='24' rx='6' fill='%2322c55e'/></svg>" />
+    <title>kyzzo cal</title>
+    <script is:inline define:vars={{ key: STORAGE_KEY }}>
+      try {
+        const raw = localStorage.getItem(key);
+        const s = raw ? (JSON.parse(raw).settings || {}) : {};
+        const root = document.documentElement;
+        if (s.theme === 'light' || s.theme === 'dark') root.setAttribute('data-theme', s.theme);
+        if (s.animations === 'on' || s.animations === 'off') root.setAttribute('data-motion', s.animations);
+        if (typeof s.scale === 'number' && s.scale > 0) root.style.fontSize = (s.scale * 16) + 'px';
+      } catch {}
+    </script>
+  </head>
+  <body>
+    <CalendarApp client:load />
+  </body>
+</html>
