@@ -39,19 +39,24 @@ export const DayCell = React.forwardRef<HTMLButtonElement, Props>(function DayCe
       disabled={!inCurrentMonth}
       style={{ ...filledStyle, ...style }}
       className={cn(
-        'aspect-square w-full flex items-center justify-center select-none focus:outline-none',
+        'aspect-square w-full flex flex-col items-center justify-center gap-[0.1em] select-none focus:outline-none',
         sizeClasses[size],
         filled ? 'font-bold' : 'font-medium',
         !inCurrentMonth && 'text-transparent pointer-events-none',
         inCurrentMonth && !filled && 'bg-[var(--color-surface-2)] text-[var(--color-muted)] hover:bg-[var(--color-border)]',
-        isToday && inCurrentMonth && !filled && 'text-[var(--color-accent)] font-bold',
-        isToday && filled && 'underline underline-offset-2 decoration-2',
         className,
       )}
       aria-label={`Day ${day}`}
       {...rest}
     >
-      {day}
+      <span>{day}</span>
+      {isToday && inCurrentMonth && (
+        <span
+          aria-hidden
+          className="block rounded-full bg-current"
+          style={{ height: '0.3em', width: '0.3em' }}
+        />
+      )}
     </button>
   );
 });
