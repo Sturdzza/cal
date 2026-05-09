@@ -79,22 +79,31 @@ export function CalendarApp() {
     });
   }
 
-  const dragRef = React.useRef<{ active: boolean; lastKey: string | null; didDrag: boolean }>({
-    active: false, lastKey: null, didDrag: false,
-  });
+  const dragRef = React.useRef<{
+    active: boolean;
+    mode: 'paint' | 'clear';
+    lastKey: string | null;
+    didDrag: boolean;
+  }>({ active: false, mode: 'paint', lastKey: null, didDrag: false });
 
   function paintForce(key: string) {
     setState((s) => {
       const next = { ...s.days };
-      if (s.activeCategoryId === null) delete next[key];
-      else next[key] = s.activeCategoryId;
+      if (dragRef.current.mode === 'clear' || s.activeCategoryId === null) {
+        delete next[key];
+      } else {
+        next[key] = s.activeCategoryId;
+      }
       return { ...s, days: next };
     });
   }
 
   function onCellPointerDown(e: React.PointerEvent<HTMLButtonElement>, key: string) {
     if (e.button !== 0) return;
-    dragRef.current = { active: true, lastKey: key, didDrag: false };
+    const cellCat = state.days[key];
+    const active = state.activeCategoryId;
+    const mode: 'paint' | 'clear' = active === null || cellCat === active ? 'clear' : 'paint';
+    dragRef.current = { active: true, mode, lastKey: key, didDrag: false };
   }
 
   function onCellClick(key: string) {
