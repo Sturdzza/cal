@@ -16,7 +16,9 @@ function applyDomSettings(s: Settings) {
   else root.setAttribute('data-theme', s.theme);
   if (s.animations === 'system') root.removeAttribute('data-motion');
   else root.setAttribute('data-motion', s.animations);
-  root.style.fontSize = `${s.scale * 16}px`;
+  if (typeof s.scale === 'number' && s.scale > 0 && Number.isFinite(s.scale)) {
+    root.style.fontSize = `${s.scale * 16}px`;
+  }
 }
 
 export function CalendarApp() {
@@ -34,7 +36,15 @@ export function CalendarApp() {
     return { year: t.getFullYear(), monthIdx: t.getMonth(), weekStart: startOfWeek(t) };
   });
 
-  const today = React.useMemo(() => new Date(), []);
+  const [today, setToday] = React.useState(() => new Date());
+
+  React.useEffect(() => {
+    const now = new Date();
+    const msUntilMidnight =
+      new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1).getTime() - now.getTime();
+    const t = window.setTimeout(() => setToday(new Date()), msUntilMidnight + 100);
+    return () => window.clearTimeout(t);
+  }, [today]);
 
   React.useEffect(() => {
     const loaded = load();

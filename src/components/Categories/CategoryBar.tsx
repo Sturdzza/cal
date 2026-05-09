@@ -74,6 +74,10 @@ function CategoryPill({ category, active, onSelect, onSave, onDelete }: PillProp
   const triggeredLongPress = React.useRef(false);
   const editorTriggerRef = React.useRef<HTMLButtonElement | null>(null);
 
+  React.useEffect(() => () => {
+    if (longPressTimer.current) window.clearTimeout(longPressTimer.current);
+  }, []);
+
   function startLongPress() {
     triggeredLongPress.current = false;
     longPressTimer.current = window.setTimeout(() => {
