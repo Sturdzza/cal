@@ -15,9 +15,6 @@ function applyDomSettings(s: Settings) {
   else root.setAttribute('data-theme', s.theme);
   if (s.animations === 'system') root.removeAttribute('data-motion');
   else root.setAttribute('data-motion', s.animations);
-  if (typeof s.scale === 'number' && s.scale > 0 && Number.isFinite(s.scale)) {
-    root.style.fontSize = `${s.scale * 16}px`;
-  }
 }
 
 export function CalendarApp() {
@@ -142,14 +139,6 @@ export function CalendarApp() {
     setCursor({ year: t.getFullYear(), monthIdx: t.getMonth(), weekStart: startOfWeek(t) });
   }
 
-  function setScale(scale: number) {
-    setState((s) => ({ ...s, settings: { ...s.settings, scale } }));
-  }
-
-  function setFullWidth(fullWidth: boolean) {
-    setState((s) => ({ ...s, settings: { ...s.settings, fullWidth } }));
-  }
-
   function onYearMonthClick(monthIdx: number) {
     setCursor((c) => ({ ...c, monthIdx, weekStart: startOfWeek(new Date(c.year, monthIdx, 1)) }));
     setZoom('month');
@@ -174,10 +163,6 @@ export function CalendarApp() {
               onPrev={() => nav(-1)}
               onNext={() => nav(1)}
               onToday={goToday}
-              scale={state.settings.scale}
-              onScale={setScale}
-              fullWidth={state.settings.fullWidth}
-              onFullWidth={setFullWidth}
             />
             <SettingsDialog
               settings={state.settings}

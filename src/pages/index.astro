@@ -19,7 +19,6 @@ import { STORAGE_KEY } from '../lib/storage';
         const root = document.documentElement;
         if (s.theme === 'light' || s.theme === 'dark') root.setAttribute('data-theme', s.theme);
         if (s.animations === 'on' || s.animations === 'off') root.setAttribute('data-motion', s.animations);
-        if (typeof s.scale === 'number' && s.scale > 0) root.style.fontSize = (s.scale * 16) + 'px';
       } catch {}
     </script>
   </head>

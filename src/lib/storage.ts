@@ -13,7 +13,6 @@ export const DEFAULT_SETTINGS: Settings = {
   theme: 'system',
   animations: 'system',
   defaultZoom: 'year',
-  scale: 1,
   fullWidth: false,
 };
 

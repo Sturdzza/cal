@@ -15,7 +15,6 @@ export type Settings = {
   theme: ThemeChoice;
   animations: MotionChoice;
   defaultZoom: ZoomLevel;
-  scale: number;
   fullWidth: boolean;
 };
 
