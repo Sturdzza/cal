@@ -212,12 +212,13 @@ export function CalendarApp() {
       <header className="sticky top-0 z-20 backdrop-blur bg-[var(--color-bg)]/80 border-b border-[var(--color-border)]">
         <div className="max-w-[1280px] mx-auto px-3 sm:px-6 py-3 flex flex-wrap items-center gap-3 justify-between">
           <div className="flex items-center gap-2">
-            <div
-              className="h-7 w-7 rounded-lg"
-              style={{ background: 'var(--color-accent)' }}
+            <img
+              src={`${import.meta.env.BASE_URL}favicon.svg`}
+              alt=""
+              className="h-7 w-7"
               aria-hidden
             />
-            <h1 className="text-base sm:text-lg font-semibold tracking-tight">kyzzo cal</h1>
+            <h1 className="text-base sm:text-lg font-semibold tracking-tight">kYzzo Calendar</h1>
           </div>
           <div className="flex items-center gap-2 flex-wrap">
             <Toolbar
