@@ -31,7 +31,7 @@ export function rgbToHex({ r, g, b }: RGB): string {
 export function isDarkColor(hex: string): boolean {
   const rgb = hexToRgb(hex);
   if (!rgb) return false;
-  return (rgb.r * 299 + rgb.g * 587 + rgb.b * 114) / 1000 < 140;
+  return (rgb.r * 299 + rgb.g * 587 + rgb.b * 114) / 1000 < 128;
 }
 
 export function rgbToHsl({ r, g, b }: RGB): { h: number; s: number; l: number } {

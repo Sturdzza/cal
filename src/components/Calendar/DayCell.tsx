@@ -21,7 +21,6 @@ export const DayCell = React.forwardRef<HTMLButtonElement, Props>(function DayCe
   ref,
 ) {
   const filled = !!color && inCurrentMonth;
-  const ringWidth = size === 'sm' ? 3 : size === 'lg' ? 6 : 4;
   const dark = filled && isDarkColor(color!);
   const filledStyle: React.CSSProperties | undefined = filled
     ? {
@@ -29,12 +28,6 @@ export const DayCell = React.forwardRef<HTMLButtonElement, Props>(function DayCe
         color: dark
           ? `color-mix(in srgb, ${color} 25%, white)`
           : `color-mix(in srgb, ${color} 20%, black)`,
-        border: `${ringWidth}px solid ${
-          dark
-            ? `color-mix(in srgb, ${color} 45%, white)`
-            : `color-mix(in srgb, ${color} 35%, black)`
-        }`,
-        boxSizing: 'border-box',
       }
     : undefined;
 
