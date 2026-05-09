@@ -50,13 +50,11 @@ export const DayCell = React.forwardRef<HTMLButtonElement, Props>(function DayCe
       {...rest}
     >
       <span>{day}</span>
-      {isToday && inCurrentMonth && (
-        <span
-          aria-hidden
-          className="block rounded-full bg-current"
-          style={{ height: '0.3em', width: '0.3em' }}
-        />
-      )}
+      <span
+        aria-hidden
+        className={cn('block rounded-full', isToday && inCurrentMonth ? 'bg-current' : 'opacity-0')}
+        style={{ height: '0.3em', width: '0.3em' }}
+      />
     </button>
   );
 });
