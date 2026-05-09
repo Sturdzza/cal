@@ -45,6 +45,7 @@ export const DayCell = React.forwardRef<HTMLButtonElement, Props>(function DayCe
         !inCurrentMonth && 'text-transparent pointer-events-none',
         inCurrentMonth && !filled && 'bg-[var(--color-surface-2)] text-[var(--color-muted)] hover:bg-[var(--color-border)]',
         isToday && inCurrentMonth && !filled && 'text-[var(--color-accent)] font-bold',
+        isToday && filled && 'underline underline-offset-2 decoration-2',
         className,
       )}
       aria-label={`Day ${day}`}
