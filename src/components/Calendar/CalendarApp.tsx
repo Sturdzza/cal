@@ -79,6 +79,60 @@ export function CalendarApp() {
     });
   }
 
+  const dragRef = React.useRef<{ active: boolean; lastKey: string | null; didDrag: boolean }>({
+    active: false, lastKey: null, didDrag: false,
+  });
+
+  function paintForce(key: string) {
+    setState((s) => {
+      const next = { ...s.days };
+      if (s.activeCategoryId === null) delete next[key];
+      else next[key] = s.activeCategoryId;
+      return { ...s, days: next };
+    });
+  }
+
+  function onCellPointerDown(e: React.PointerEvent<HTMLButtonElement>, key: string) {
+    if (e.button !== 0) return;
+    dragRef.current = { active: true, lastKey: key, didDrag: false };
+  }
+
+  function onCellClick(key: string) {
+    if (dragRef.current.didDrag) {
+      dragRef.current.didDrag = false;
+      return;
+    }
+    paint(key);
+  }
+
+  React.useEffect(() => {
+    function onMove(e: PointerEvent) {
+      if (!dragRef.current.active) return;
+      const el = document.elementFromPoint(e.clientX, e.clientY);
+      const tile = el?.closest<HTMLElement>('[data-day-tile][data-day-key]');
+      const key = tile?.getAttribute('data-day-key');
+      if (!key || key === dragRef.current.lastKey) return;
+      if (!dragRef.current.didDrag) {
+        dragRef.current.didDrag = true;
+        if (dragRef.current.lastKey) paintForce(dragRef.current.lastKey);
+      }
+      dragRef.current.lastKey = key;
+      paintForce(key);
+    }
+    function onUp() {
+      dragRef.current.active = false;
+      dragRef.current.lastKey = null;
+    }
+    window.addEventListener('pointermove', onMove);
+    window.addEventListener('pointerup', onUp);
+    window.addEventListener('pointercancel', onUp);
+    return () => {
+      window.removeEventListener('pointermove', onMove);
+      window.removeEventListener('pointerup', onUp);
+      window.removeEventListener('pointercancel', onUp);
+    };
+  }, []);
+
   function assign(key: string, categoryId: string | null) {
     setState((s) => {
       const next = { ...s.days };
@@ -185,7 +239,8 @@ export function CalendarApp() {
                 days={state.days}
                 categories={state.categories}
                 categoriesById={categoriesById}
-                onPaint={paint}
+                onPaint={onCellClick}
+                onPaintPointerDown={onCellPointerDown}
                 onAssign={assign}
                 today={today}
                 fullWidth={state.settings.fullWidth}
@@ -197,7 +252,8 @@ export function CalendarApp() {
                 days={state.days}
                 categories={state.categories}
                 categoriesById={categoriesById}
-                onPaint={paint}
+                onPaint={onCellClick}
+                onPaintPointerDown={onCellPointerDown}
                 onAssign={assign}
                 onMonthClick={onYearMonthClick}
                 today={today}
@@ -210,7 +266,8 @@ export function CalendarApp() {
                 days={state.days}
                 categories={state.categories}
                 categoriesById={categoriesById}
-                onPaint={paint}
+                onPaint={onCellClick}
+                onPaintPointerDown={onCellPointerDown}
                 onAssign={assign}
                 today={today}
                 fullWidth={state.settings.fullWidth}
@@ -221,7 +278,7 @@ export function CalendarApp() {
       </main>
 
       <footer className="px-3 sm:px-6 py-4 text-center text-[10px] text-[var(--color-muted)]">
-        Saved locally · Right-click a day (or long-press) to pick a color · Left-click to repaint or clear
+        Saved locally · Click a day to paint · Click and drag to paint many · Right-click (or long-press) to pick a color
       </footer>
     </div>
   );

@@ -22,7 +22,6 @@ export const DayCell = React.forwardRef<HTMLButtonElement, Props>(function DayCe
 ) {
   const filled = !!color && inCurrentMonth;
   const ringWidth = size === 'sm' ? 3 : size === 'lg' ? 6 : 4;
-  const innerRing = size === 'sm' ? 1 : size === 'lg' ? 2 : 1.5;
   const dark = filled && isDarkColor(color!);
   const filledStyle: React.CSSProperties | undefined = filled
     ? {
@@ -34,11 +33,6 @@ export const DayCell = React.forwardRef<HTMLButtonElement, Props>(function DayCe
           dark
             ? `color-mix(in srgb, ${color} 45%, white)`
             : `color-mix(in srgb, ${color} 35%, black)`
-        }`,
-        boxShadow: `inset 0 0 0 ${innerRing}px ${
-          dark
-            ? `color-mix(in srgb, ${color} 60%, black)`
-            : `color-mix(in srgb, ${color} 75%, white)`
         }`,
         boxSizing: 'border-box',
       }
@@ -52,14 +46,12 @@ export const DayCell = React.forwardRef<HTMLButtonElement, Props>(function DayCe
       disabled={!inCurrentMonth}
       style={{ ...filledStyle, ...style }}
       className={cn(
-        'aspect-square w-full flex items-center justify-center select-none',
-        'transition-transform active:scale-95',
+        'aspect-square w-full flex items-center justify-center select-none focus:outline-none',
         sizeClasses[size],
         filled ? 'font-bold' : 'font-medium',
         !inCurrentMonth && 'text-transparent pointer-events-none',
         inCurrentMonth && !filled && 'bg-[var(--color-surface-2)] text-[var(--color-muted)] hover:bg-[var(--color-border)]',
-        isToday && inCurrentMonth && !filled && 'ring-1 ring-[var(--color-accent)] text-[var(--color-fg)]',
-        isToday && filled && 'outline outline-2 outline-offset-2 outline-[var(--color-fg)]/30',
+        isToday && inCurrentMonth && !filled && 'text-[var(--color-accent)] font-bold',
         className,
       )}
       aria-label={`Day ${day}`}

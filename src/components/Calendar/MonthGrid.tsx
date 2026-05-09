@@ -10,6 +10,7 @@ type Props = {
   categories: Category[];
   categoriesById: Record<string, Category>;
   onPaint: (key: string) => void;
+  onPaintPointerDown: (e: React.PointerEvent<HTMLButtonElement>, key: string) => void;
   onAssign: (key: string, categoryId: string | null) => void;
   size?: 'sm' | 'md' | 'lg';
   showWeekdays?: boolean;
@@ -18,7 +19,7 @@ type Props = {
 };
 
 export function MonthGrid({
-  year, monthIdx, days, categories, categoriesById, onPaint, onAssign,
+  year, monthIdx, days, categories, categoriesById, onPaint, onPaintPointerDown, onAssign,
   size = 'md', showWeekdays = true, today, gap = 'md',
 }: Props) {
   const total = daysInMonth(year, monthIdx);
@@ -72,7 +73,9 @@ export function MonthGrid({
                 isToday={isToday}
                 color={color}
                 size={size}
+                data-day-key={k}
                 onClick={() => onPaint(k)}
+                onPointerDown={(e) => onPaintPointerDown(e, k)}
               />
             </DayContextMenu>
           );

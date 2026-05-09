@@ -1,3 +1,4 @@
+import * as React from 'react';
 import { DayCell } from './DayCell';
 import { DayContextMenu } from './DayContextMenu';
 import { addDays, dayKey, isSameDay, MONTHS, WEEKDAYS_LONG } from '../../lib/date';
@@ -9,12 +10,13 @@ type Props = {
   categories: Category[];
   categoriesById: Record<string, Category>;
   onPaint: (key: string) => void;
+  onPaintPointerDown: (e: React.PointerEvent<HTMLButtonElement>, key: string) => void;
   onAssign: (key: string, categoryId: string | null) => void;
   today: Date;
   fullWidth?: boolean;
 };
 
-export function WeekView({ weekStart, days, categories, categoriesById, onPaint, onAssign, today, fullWidth = false }: Props) {
+export function WeekView({ weekStart, days, categories, categoriesById, onPaint, onPaintPointerDown, onAssign, today, fullWidth = false }: Props) {
   const weekDates = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
   const start = weekDates[0]!;
   const end = weekDates[6]!;
@@ -51,7 +53,9 @@ export function WeekView({ weekStart, days, categories, categoriesById, onPaint,
                 isToday={isSameDay(d, today)}
                 color={color}
                 size="lg"
+                data-day-key={k}
                 onClick={() => onPaint(k)}
+                onPointerDown={(e) => onPaintPointerDown(e, k)}
               />
             </DayContextMenu>
           );

@@ -1,3 +1,4 @@
+import * as React from 'react';
 import { MonthGrid } from './MonthGrid';
 import { SHORT_MONTHS } from '../../lib/date';
 import type { Category, DayMap } from '../../lib/types';
@@ -8,6 +9,7 @@ type Props = {
   categories: Category[];
   categoriesById: Record<string, Category>;
   onPaint: (key: string) => void;
+  onPaintPointerDown: (e: React.PointerEvent<HTMLButtonElement>, key: string) => void;
   onAssign: (key: string, categoryId: string | null) => void;
   onMonthClick: (monthIdx: number) => void;
   today: Date;
@@ -15,7 +17,7 @@ type Props = {
 };
 
 export function YearView({
-  year, days, categories, categoriesById, onPaint, onAssign, onMonthClick, today, fullWidth = false,
+  year, days, categories, categoriesById, onPaint, onPaintPointerDown, onAssign, onMonthClick, today, fullWidth = false,
 }: Props) {
   return (
     <div className={`mx-auto w-full ${fullWidth ? '' : 'max-w-[68.75rem]'}`}>
@@ -37,6 +39,7 @@ export function YearView({
               categories={categories}
               categoriesById={categoriesById}
               onPaint={onPaint}
+              onPaintPointerDown={onPaintPointerDown}
               onAssign={onAssign}
               today={today}
               size="sm"
