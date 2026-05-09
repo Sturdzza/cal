@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { cn } from '../../lib/cn';
+import { isDarkColor } from '../../lib/color';
 
 type Props = {
   day: number;
@@ -22,12 +23,23 @@ export const DayCell = React.forwardRef<HTMLButtonElement, Props>(function DayCe
   const filled = !!color && inCurrentMonth;
   const ringWidth = size === 'sm' ? 3 : size === 'lg' ? 6 : 4;
   const innerRing = size === 'sm' ? 1 : size === 'lg' ? 2 : 1.5;
+  const dark = filled && isDarkColor(color!);
   const filledStyle: React.CSSProperties | undefined = filled
     ? {
         background: color!,
-        color: `color-mix(in srgb, ${color} 20%, black)`,
-        border: `${ringWidth}px solid color-mix(in srgb, ${color} 35%, black)`,
-        boxShadow: `inset 0 0 0 ${innerRing}px color-mix(in srgb, ${color} 75%, white)`,
+        color: dark
+          ? `color-mix(in srgb, ${color} 25%, white)`
+          : `color-mix(in srgb, ${color} 20%, black)`,
+        border: `${ringWidth}px solid ${
+          dark
+            ? `color-mix(in srgb, ${color} 45%, white)`
+            : `color-mix(in srgb, ${color} 35%, black)`
+        }`,
+        boxShadow: `inset 0 0 0 ${innerRing}px ${
+          dark
+            ? `color-mix(in srgb, ${color} 60%, black)`
+            : `color-mix(in srgb, ${color} 75%, white)`
+        }`,
         boxSizing: 'border-box',
       }
     : undefined;
