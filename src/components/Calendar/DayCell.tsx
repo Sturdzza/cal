@@ -46,7 +46,7 @@ export const DayCell = React.forwardRef<HTMLButtonElement, Props>(function DayCe
         inCurrentMonth && !filled && 'bg-[var(--color-surface-2)] text-[var(--color-muted)] hover:bg-[var(--color-border)]',
         className,
       )}
-      aria-label={`Day ${day}`}
+      aria-label={isToday && inCurrentMonth ? `Today, day ${day}` : `Day ${day}`}
       {...rest}
     >
       <span>{day}</span>
