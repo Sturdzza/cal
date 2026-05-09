@@ -2,12 +2,16 @@ import * as React from 'react';
 import { Button } from '../ui/button';
 import { DialogClose, DialogPopup, DialogRoot, DialogTitle, DialogTrigger } from '../ui/dialog';
 import { Switch } from '../ui/switch';
+import { CategoryList } from '../Categories/CategoryList';
 import { cn } from '../../lib/cn';
-import type { Settings, ThemeChoice, MotionChoice, ZoomLevel } from '../../lib/types';
+import type { Category, Settings, ThemeChoice, MotionChoice, ZoomLevel } from '../../lib/types';
 
 type Props = {
   settings: Settings;
   onChange: (next: Settings) => void;
+  categories: Category[];
+  onSaveCategory: (cat: Category) => void;
+  onDeleteCategory: (id: string) => void;
 };
 
 const THEMES: { value: ThemeChoice; label: string }[] = [
@@ -28,7 +32,7 @@ const VIEWS: { value: ZoomLevel; label: string }[] = [
   { value: 'week', label: 'Week' },
 ];
 
-export function SettingsDialog({ settings, onChange }: Props) {
+export function SettingsDialog({ settings, onChange, categories, onSaveCategory, onDeleteCategory }: Props) {
   function set<K extends keyof Settings>(key: K, value: Settings[K]) {
     onChange({ ...settings, [key]: value });
   }
@@ -50,10 +54,18 @@ export function SettingsDialog({ settings, onChange }: Props) {
           </button>
         }
       />
-      <DialogPopup className="w-[min(92vw,460px)]">
+      <DialogPopup className="w-[min(92vw,460px)] max-h-[85vh] overflow-y-auto">
         <DialogTitle className="text-base font-semibold mb-5">Settings</DialogTitle>
 
         <div className="space-y-5">
+          <Field label="Categories" hint="Right-click any day to assign one">
+            <CategoryList
+              categories={categories}
+              onSave={onSaveCategory}
+              onDelete={onDeleteCategory}
+            />
+          </Field>
+
           <Field label="Theme">
             <Segmented
               value={settings.theme}

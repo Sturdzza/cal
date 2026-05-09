@@ -1,3 +1,4 @@
+import * as React from 'react';
 import { cn } from '../../lib/cn';
 
 type Props = {
@@ -6,8 +7,7 @@ type Props = {
   isToday: boolean;
   color?: string | null;
   size?: 'sm' | 'md' | 'lg';
-  onClick?: () => void;
-};
+} & Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'color'>;
 
 const sizeClasses: Record<NonNullable<Props['size']>, string> = {
   sm: 'text-[10px] rounded-md',
@@ -15,7 +15,10 @@ const sizeClasses: Record<NonNullable<Props['size']>, string> = {
   lg: 'text-2xl rounded-2xl sm:text-3xl',
 };
 
-export function DayCell({ day, inCurrentMonth, isToday, color, size = 'md', onClick }: Props) {
+export const DayCell = React.forwardRef<HTMLButtonElement, Props>(function DayCell(
+  { day, inCurrentMonth, isToday, color, size = 'md', className, style, ...rest },
+  ref,
+) {
   const filled = !!color && inCurrentMonth;
   const ringWidth = size === 'sm' ? 3 : size === 'lg' ? 6 : 4;
   const innerRing = size === 'sm' ? 1 : size === 'lg' ? 2 : 1.5;
@@ -31,11 +34,11 @@ export function DayCell({ day, inCurrentMonth, isToday, color, size = 'md', onCl
 
   return (
     <button
+      ref={ref}
       type="button"
       data-day-tile
-      onClick={onClick}
       disabled={!inCurrentMonth}
-      style={filledStyle}
+      style={{ ...filledStyle, ...style }}
       className={cn(
         'aspect-square w-full flex items-center justify-center select-none',
         'transition-transform active:scale-95',
@@ -45,10 +48,12 @@ export function DayCell({ day, inCurrentMonth, isToday, color, size = 'md', onCl
         inCurrentMonth && !filled && 'bg-[var(--color-surface-2)] text-[var(--color-muted)] hover:bg-[var(--color-border)]',
         isToday && inCurrentMonth && !filled && 'ring-1 ring-[var(--color-accent)] text-[var(--color-fg)]',
         isToday && filled && 'outline outline-2 outline-offset-2 outline-[var(--color-fg)]/30',
+        className,
       )}
       aria-label={`Day ${day}`}
+      {...rest}
     >
       {day}
     </button>
   );
-}
+});

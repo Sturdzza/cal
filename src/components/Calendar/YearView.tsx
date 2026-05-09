@@ -5,14 +5,18 @@ import type { Category, DayMap } from '../../lib/types';
 type Props = {
   year: number;
   days: DayMap;
+  categories: Category[];
   categoriesById: Record<string, Category>;
   onPaint: (key: string) => void;
+  onAssign: (key: string, categoryId: string | null) => void;
   onMonthClick: (monthIdx: number) => void;
   today: Date;
   fullWidth?: boolean;
 };
 
-export function YearView({ year, days, categoriesById, onPaint, onMonthClick, today, fullWidth = false }: Props) {
+export function YearView({
+  year, days, categories, categoriesById, onPaint, onAssign, onMonthClick, today, fullWidth = false,
+}: Props) {
   return (
     <div className={`mx-auto w-full ${fullWidth ? '' : 'max-w-[68.75rem]'}`}>
       <h2 className="px-1 mb-3 text-lg font-semibold tracking-tight">{year}</h2>
@@ -30,12 +34,14 @@ export function YearView({ year, days, categoriesById, onPaint, onMonthClick, to
               year={year}
               monthIdx={i}
               days={days}
+              categories={categories}
               categoriesById={categoriesById}
               onPaint={onPaint}
+              onAssign={onAssign}
               today={today}
               size="sm"
               gap="sm"
-              showWeekdays={false}
+              showWeekdays
             />
           </div>
         ))}

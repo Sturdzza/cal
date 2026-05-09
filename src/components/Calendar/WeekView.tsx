@@ -1,17 +1,20 @@
 import { DayCell } from './DayCell';
+import { DayContextMenu } from './DayContextMenu';
 import { addDays, dayKey, isSameDay, MONTHS, WEEKDAYS_LONG } from '../../lib/date';
 import type { Category, DayMap } from '../../lib/types';
 
 type Props = {
   weekStart: Date;
   days: DayMap;
+  categories: Category[];
   categoriesById: Record<string, Category>;
   onPaint: (key: string) => void;
+  onAssign: (key: string, categoryId: string | null) => void;
   today: Date;
   fullWidth?: boolean;
 };
 
-export function WeekView({ weekStart, days, categoriesById, onPaint, today, fullWidth = false }: Props) {
+export function WeekView({ weekStart, days, categories, categoriesById, onPaint, onAssign, today, fullWidth = false }: Props) {
   const weekDates = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
   const start = weekDates[0]!;
   const end = weekDates[6]!;
@@ -33,18 +36,24 @@ export function WeekView({ weekStart, days, categoriesById, onPaint, today, full
       <div className="grid grid-cols-7 gap-2 sm:gap-3">
         {weekDates.map((d) => {
           const k = dayKey(d.getFullYear(), d.getMonth(), d.getDate());
-          const catId = days[k];
+          const catId = days[k] ?? null;
           const color = catId ? categoriesById[catId]?.color : null;
           return (
-            <DayCell
+            <DayContextMenu
               key={k}
-              day={d.getDate()}
-              inCurrentMonth
-              isToday={isSameDay(d, today)}
-              color={color}
-              size="lg"
-              onClick={() => onPaint(k)}
-            />
+              categories={categories}
+              currentCategoryId={catId}
+              onAssign={(id) => onAssign(k, id)}
+            >
+              <DayCell
+                day={d.getDate()}
+                inCurrentMonth
+                isToday={isSameDay(d, today)}
+                color={color}
+                size="lg"
+                onClick={() => onPaint(k)}
+              />
+            </DayContextMenu>
           );
         })}
       </div>

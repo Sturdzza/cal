@@ -3,7 +3,6 @@ import { Toolbar } from './Toolbar';
 import { MonthView } from './MonthView';
 import { YearView } from './YearView';
 import { WeekView } from './WeekView';
-import { CategoryBar } from '../Categories/CategoryBar';
 import { SettingsDialog } from '../Settings/SettingsDialog';
 import { addDays, addMonths, startOfWeek } from '../../lib/date';
 import { DEFAULT_SETTINGS, load, save, type Persisted } from '../../lib/storage';
@@ -83,8 +82,17 @@ export function CalendarApp() {
     });
   }
 
-  function setActive(id: string | null) {
-    setState((s) => ({ ...s, activeCategoryId: id }));
+  function assign(key: string, categoryId: string | null) {
+    setState((s) => {
+      const next = { ...s.days };
+      if (categoryId === null) delete next[key];
+      else next[key] = categoryId;
+      return {
+        ...s,
+        days: next,
+        activeCategoryId: categoryId ?? s.activeCategoryId,
+      };
+    });
   }
 
   function saveCategory(cat: Category) {
@@ -171,29 +179,29 @@ export function CalendarApp() {
               fullWidth={state.settings.fullWidth}
               onFullWidth={setFullWidth}
             />
-            <SettingsDialog settings={state.settings} onChange={updateSettings} />
+            <SettingsDialog
+              settings={state.settings}
+              onChange={updateSettings}
+              categories={state.categories}
+              onSaveCategory={saveCategory}
+              onDeleteCategory={deleteCategory}
+            />
           </div>
         </div>
       </header>
 
       <main className="flex-1">
-        <div className={`mx-auto px-3 sm:px-6 py-4 space-y-4 ${state.settings.fullWidth ? 'w-full' : 'max-w-[80rem]'}`}>
-          <CategoryBar
-            categories={state.categories}
-            activeId={state.activeCategoryId}
-            onSelectActive={setActive}
-            onSave={saveCategory}
-            onDelete={deleteCategory}
-          />
-
+        <div className={`mx-auto px-3 sm:px-6 py-4 ${state.settings.fullWidth ? 'w-full' : 'max-w-[80rem]'}`}>
           <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-3 sm:p-6">
             {zoom === 'month' && (
               <MonthView
                 year={cursor.year}
                 monthIdx={cursor.monthIdx}
                 days={state.days}
+                categories={state.categories}
                 categoriesById={categoriesById}
                 onPaint={paint}
+                onAssign={assign}
                 today={today}
                 fullWidth={state.settings.fullWidth}
               />
@@ -202,8 +210,10 @@ export function CalendarApp() {
               <YearView
                 year={cursor.year}
                 days={state.days}
+                categories={state.categories}
                 categoriesById={categoriesById}
                 onPaint={paint}
+                onAssign={assign}
                 onMonthClick={onYearMonthClick}
                 today={today}
                 fullWidth={state.settings.fullWidth}
@@ -213,8 +223,10 @@ export function CalendarApp() {
               <WeekView
                 weekStart={cursor.weekStart}
                 days={state.days}
+                categories={state.categories}
                 categoriesById={categoriesById}
                 onPaint={paint}
+                onAssign={assign}
                 today={today}
                 fullWidth={state.settings.fullWidth}
               />
@@ -224,7 +236,7 @@ export function CalendarApp() {
       </main>
 
       <footer className="px-3 sm:px-6 py-4 text-center text-[10px] text-[var(--color-muted)]">
-        Saved locally · Click a day to paint with the active category · Click again to clear
+        Saved locally · Right-click a day (or long-press) to pick a color · Left-click to repaint or clear
       </footer>
     </div>
   );

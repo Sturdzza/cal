@@ -1,4 +1,5 @@
 import { DayCell } from './DayCell';
+import { DayContextMenu } from './DayContextMenu';
 import { dayKey, daysInMonth, firstWeekdayOfMonth, WEEKDAYS } from '../../lib/date';
 import type { Category, DayMap } from '../../lib/types';
 
@@ -6,8 +7,10 @@ type Props = {
   year: number;
   monthIdx: number;
   days: DayMap;
+  categories: Category[];
   categoriesById: Record<string, Category>;
   onPaint: (key: string) => void;
+  onAssign: (key: string, categoryId: string | null) => void;
   size?: 'sm' | 'md' | 'lg';
   showWeekdays?: boolean;
   today: Date;
@@ -15,7 +18,7 @@ type Props = {
 };
 
 export function MonthGrid({
-  year, monthIdx, days, categoriesById, onPaint,
+  year, monthIdx, days, categories, categoriesById, onPaint, onAssign,
   size = 'md', showWeekdays = true, today, gap = 'md',
 }: Props) {
   const total = daysInMonth(year, monthIdx);
@@ -30,9 +33,16 @@ export function MonthGrid({
   return (
     <div className="w-full">
       {showWeekdays && (
-        <div className={`grid grid-cols-7 ${gapCls} mb-2 px-0.5`}>
+        <div className={`grid grid-cols-7 ${gapCls} mb-1.5 px-0.5`}>
           {WEEKDAYS.map((w, i) => (
-            <div key={i} className="text-center text-[10px] sm:text-xs uppercase tracking-wider text-[var(--color-muted)]">
+            <div
+              key={i}
+              className={
+                size === 'sm'
+                  ? 'text-center text-[8px] uppercase tracking-wide text-[var(--color-muted)]'
+                  : 'text-center text-[10px] sm:text-xs uppercase tracking-wider text-[var(--color-muted)]'
+              }
+            >
               {w}
             </div>
           ))}
@@ -44,21 +54,27 @@ export function MonthGrid({
             return <div key={`e-${idx}`} aria-hidden className="aspect-square" />;
           }
           const k = dayKey(year, monthIdx, c.day);
-          const catId = days[k];
+          const catId = days[k] ?? null;
           const color = catId ? categoriesById[catId]?.color : null;
           const isToday = today.getFullYear() === year
             && today.getMonth() === monthIdx
             && today.getDate() === c.day;
           return (
-            <DayCell
+            <DayContextMenu
               key={k}
-              day={c.day}
-              inCurrentMonth
-              isToday={isToday}
-              color={color}
-              size={size}
-              onClick={() => onPaint(k)}
-            />
+              categories={categories}
+              currentCategoryId={catId}
+              onAssign={(id) => onAssign(k, id)}
+            >
+              <DayCell
+                day={c.day}
+                inCurrentMonth
+                isToday={isToday}
+                color={color}
+                size={size}
+                onClick={() => onPaint(k)}
+              />
+            </DayContextMenu>
           );
         })}
       </div>
