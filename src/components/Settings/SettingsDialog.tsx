@@ -4,6 +4,7 @@ import { DialogClose, DialogPopup, DialogRoot, DialogTitle, DialogTrigger } from
 import { Switch } from '../ui/switch';
 import { CategoryList } from '../Categories/CategoryList';
 import { cn } from '../../lib/cn';
+import { parseImport, serializeExport, type Persisted } from '../../lib/storage';
 import type { Category, Settings, ThemeChoice, MotionChoice, ZoomLevel } from '../../lib/types';
 
 type Props = {
@@ -12,6 +13,8 @@ type Props = {
   categories: Category[];
   onSaveCategory: (cat: Category) => void;
   onDeleteCategory: (id: string) => void;
+  getStateForExport: () => Persisted;
+  onImport: (incoming: Persisted, mode: 'replace' | 'merge') => void;
 };
 
 const THEMES: { value: ThemeChoice; label: string }[] = [
@@ -32,9 +35,58 @@ const VIEWS: { value: ZoomLevel; label: string }[] = [
   { value: 'week', label: 'Week' },
 ];
 
-export function SettingsDialog({ settings, onChange, categories, onSaveCategory, onDeleteCategory }: Props) {
+export function SettingsDialog({
+  settings,
+  onChange,
+  categories,
+  onSaveCategory,
+  onDeleteCategory,
+  getStateForExport,
+  onImport,
+}: Props) {
   function set<K extends keyof Settings>(key: K, value: Settings[K]) {
     onChange({ ...settings, [key]: value });
+  }
+
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+  const [pending, setPending] = React.useState<Persisted | null>(null);
+  const [message, setMessage] = React.useState<{ kind: 'success' | 'error'; text: string } | null>(null);
+
+  function handleExport() {
+    const state = getStateForExport();
+    const blob = new Blob([serializeExport(state)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const ymd = new Date().toISOString().slice(0, 10);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `kyzzo-cal-${ymd}.json`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+    setMessage({ kind: 'success', text: 'Exported.' });
+  }
+
+  function handleFilePicked(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+    file.text().then((raw) => {
+      try {
+        setPending(parseImport(raw));
+        setMessage(null);
+      } catch (err) {
+        setPending(null);
+        setMessage({ kind: 'error', text: err instanceof Error ? err.message : 'Could not read file' });
+      }
+    });
+  }
+
+  function applyImport(mode: 'replace' | 'merge') {
+    if (!pending) return;
+    onImport(pending, mode);
+    setPending(null);
+    setMessage({ kind: 'success', text: mode === 'replace' ? 'Replaced with imported data.' : 'Merged with imported data.' });
   }
 
   return (
@@ -106,6 +158,49 @@ export function SettingsDialog({ settings, onChange, categories, onSaveCategory,
               aria-label="Use full browser width"
             />
           </div>
+
+          <Field label="Data" hint="Back up your categories, painted days, and settings to a JSON file, or restore from one">
+            {pending ? (
+              <div className="rounded-lg border border-[var(--color-border)] p-3 space-y-3">
+                <p className="text-xs text-[var(--color-fg)]">
+                  Loaded <strong>{pending.categories.length}</strong>{' '}
+                  {pending.categories.length === 1 ? 'category' : 'categories'} and{' '}
+                  <strong>{Object.keys(pending.days).length}</strong> painted{' '}
+                  {Object.keys(pending.days).length === 1 ? 'day' : 'days'}.
+                </p>
+                <p className="text-[11px] text-[var(--color-muted)]">
+                  <strong>Replace</strong> overwrites your current data and settings. <strong>Merge</strong> keeps your settings and combines categories and painted days (imported wins on conflicts).
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  <Button size="sm" variant="accent" onClick={() => applyImport('replace')}>Replace</Button>
+                  <Button size="sm" onClick={() => applyImport('merge')}>Merge</Button>
+                  <Button size="sm" variant="ghost" onClick={() => setPending(null)}>Cancel</Button>
+                </div>
+              </div>
+            ) : (
+              <div className="flex flex-wrap gap-2">
+                <Button size="sm" onClick={handleExport}>Export</Button>
+                <Button size="sm" onClick={() => fileInputRef.current?.click()}>Import…</Button>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="application/json,.json"
+                  className="hidden"
+                  onChange={handleFilePicked}
+                />
+              </div>
+            )}
+            {message && (
+              <p
+                className={cn(
+                  'mt-2 text-[11px]',
+                  message.kind === 'error' ? 'text-red-500' : 'text-[var(--color-muted)]',
+                )}
+              >
+                {message.text}
+              </p>
+            )}
+          </Field>
         </div>
 
         <div className="mt-6 flex justify-end">
