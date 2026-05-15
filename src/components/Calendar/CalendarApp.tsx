@@ -5,7 +5,7 @@ import { YearView } from './YearView';
 import { WeekView } from './WeekView';
 import { SettingsDialog } from '../Settings/SettingsDialog';
 import { addDays, addMonths, startOfWeek } from '../../lib/date';
-import { DEFAULT_SETTINGS, load, save, type Persisted } from '../../lib/storage';
+import { DEFAULT_SETTINGS, load, mergeState, save, type Persisted } from '../../lib/storage';
 import type { Category, Settings, ZoomLevel } from '../../lib/types';
 
 function applyDomSettings(s: Settings) {
@@ -188,6 +188,20 @@ export function CalendarApp() {
     setState((s) => ({ ...s, settings: next }));
   }
 
+  const stateRef = React.useRef(state);
+  React.useEffect(() => {
+    stateRef.current = state;
+  }, [state]);
+
+  function getStateForExport(): Persisted {
+    return stateRef.current;
+  }
+
+  function importState(incoming: Persisted, mode: 'replace' | 'merge') {
+    setState((s) => (mode === 'replace' ? incoming : mergeState(s, incoming)));
+    if (mode === 'replace') applyDomSettings(incoming.settings);
+  }
+
   function nav(delta: number) {
     setCursor((c) => {
       if (!c) return c;
@@ -237,6 +251,8 @@ export function CalendarApp() {
               categories={state.categories}
               onSaveCategory={saveCategory}
               onDeleteCategory={deleteCategory}
+              getStateForExport={getStateForExport}
+              onImport={importState}
             />
           </div>
         </div>
