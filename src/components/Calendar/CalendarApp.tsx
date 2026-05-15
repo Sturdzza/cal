@@ -27,17 +27,19 @@ export function CalendarApp() {
   }));
 
   const [zoom, setZoom] = React.useState<ZoomLevel>(DEFAULT_SETTINGS.defaultZoom);
-  const [cursor, setCursor] = React.useState(() => {
-    const t = new Date();
-    return { year: t.getFullYear(), monthIdx: t.getMonth(), weekStart: startOfWeek(t) };
-  });
-
-  const [today, setToday] = React.useState(() => new Date());
+  const [today, setToday] = React.useState<Date | null>(null);
+  const [cursor, setCursor] = React.useState<{ year: number; monthIdx: number; weekStart: Date } | null>(null);
 
   React.useEffect(() => {
-    const now = new Date();
+    const t = new Date();
+    setToday(t);
+    setCursor({ year: t.getFullYear(), monthIdx: t.getMonth(), weekStart: startOfWeek(t) });
+  }, []);
+
+  React.useEffect(() => {
+    if (!today) return;
     const msUntilMidnight =
-      new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1).getTime() - now.getTime();
+      new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1).getTime() - today.getTime();
     const t = window.setTimeout(() => setToday(new Date()), msUntilMidnight + 100);
     return () => window.clearTimeout(t);
   }, [today]);
@@ -188,6 +190,7 @@ export function CalendarApp() {
 
   function nav(delta: number) {
     setCursor((c) => {
+      if (!c) return c;
       if (zoom === 'year') return { ...c, year: c.year + delta };
       if (zoom === 'month') {
         const { year, monthIdx } = addMonths(c.year, c.monthIdx, delta);
@@ -203,7 +206,7 @@ export function CalendarApp() {
   }
 
   function onYearMonthClick(monthIdx: number) {
-    setCursor((c) => ({ ...c, monthIdx, weekStart: startOfWeek(new Date(c.year, monthIdx, 1)) }));
+    setCursor((c) => (c ? { ...c, monthIdx, weekStart: startOfWeek(new Date(c.year, monthIdx, 1)) } : c));
     setZoom('month');
   }
 
@@ -242,7 +245,7 @@ export function CalendarApp() {
       <main className="flex-1">
         <div className={`mx-auto px-3 sm:px-6 py-4 ${state.settings.fullWidth ? 'w-full' : 'max-w-[80rem]'}`}>
           <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-3 sm:p-6">
-            {zoom === 'month' && (
+            {cursor && today && zoom === 'month' && (
               <MonthView
                 year={cursor.year}
                 monthIdx={cursor.monthIdx}
@@ -256,7 +259,7 @@ export function CalendarApp() {
                 fullWidth={state.settings.fullWidth}
               />
             )}
-            {zoom === 'year' && (
+            {cursor && today && zoom === 'year' && (
               <YearView
                 year={cursor.year}
                 days={state.days}
@@ -270,7 +273,7 @@ export function CalendarApp() {
                 fullWidth={state.settings.fullWidth}
               />
             )}
-            {zoom === 'week' && (
+            {cursor && today && zoom === 'week' && (
               <WeekView
                 weekStart={cursor.weekStart}
                 days={state.days}
